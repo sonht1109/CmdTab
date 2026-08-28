@@ -42,7 +42,9 @@ Privacy & Security → enable CmdTab in both panes).
 
 Apps are ordered most-recently-used first, so the current app is always
 number 1. Switch to Terminal, then it becomes 1 and the previous app becomes
-2, and so on.
+2, and so on. When you open the switcher, the **previous app (#2) is already
+focused** — release Cmd to switch to it, or press Tab to keep moving down the
+list (native-switcher behavior).
 
 ## Debugging
 
@@ -54,7 +56,7 @@ defaults write com.local.CmdTab CmdTabDebugLog -bool YES
 ```
 
 When enabled, log lines (permissions, event-tap activity, app order, switches)
-are appended to `~/tmp/cmd-tab` (menu bar → **Open Log…** reveals it
+are appended to `~/tmp/cmd-tab/log` (menu bar → **Open Log…** reveals it
 in Finder). The file is capped at 2 MB. Turn it off with the same menu item or:
 
 ```sh
@@ -75,7 +77,7 @@ defaults write com.local.CmdTab CmdTabDebugLog -bool NO
 - After switching apps, the order updates so the app you switched to is #1 and
   the app you left is #2 — Cmd+Tab toggles back and forth like the native
   switcher (history is updated at switch time, not only via activation events).
-- Debug logging: flag-gated (default off), writes to `~/tmp/cmd-tab`,
+- Debug logging: flag-gated (default off), writes to `~/tmp/cmd-tab/log`,
   toggle from the menu bar (see **Debugging** above).
 - First launch now triggers macOS's native **Input Monitoring** and
   **Accessibility** permission dialogs (previously the custom alert could
@@ -86,5 +88,8 @@ defaults write com.local.CmdTab CmdTabDebugLog -bool NO
 - Number-row keycodes on macOS are not sequential (4-9 were mapping to the
   wrong app). Digits now use a physical-keycode lookup so every number is exact.
 - Number badges now sit centered at the bottom of each icon on a gray pill.
+- The switcher opens with the previous app (**#2**) already focused, exactly
+  like the native switcher — Cmd+Tab jumps to your last app; press Tab again
+  to move further down the list. Shift+Tab opens with the last app focused.
 - App order is most-recently-used first (current app is #1).
 - Clicking outside the switcher dismisses it without switching apps.

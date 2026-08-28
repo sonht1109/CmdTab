@@ -22,6 +22,7 @@ final class SwitcherItemView: NSView {
         badgeView.backgroundColor = .black
         badgeView.wantsLayer = true
         badgeView.layer?.cornerRadius = 8
+        badgeView.layer?.masksToBounds = true
         badgeView.isEditable = false
         badgeView.isSelectable = false
         addSubview(badgeView)
@@ -44,10 +45,10 @@ final class SwitcherItemView: NSView {
     override func layout() {
         super.layout()
         let width = bounds.width
-        let iconSize: CGFloat = 40
+        let iconSize: CGFloat = 60
         iconView.frame = NSRect(
             x: (width - iconSize) / 2,
-            y: 22,
+            y: (bounds.height - iconSize) / 2,
             width: iconSize,
             height: iconSize
         )

@@ -23,13 +23,19 @@ final class SwitcherController {
         DebugLog.log("recordActivation \(app.localizedName ?? "?") -> history=\(history.compactMap { $0.localizedName }.joined(separator: ", "))")
     }
 
-    func present() {
+    func present(backward: Bool = false) {
         buildAppList()
         DebugLog.log("present order: \(apps.compactMap { $0.localizedName }.joined(separator: " | "))")
         guard !apps.isEmpty else { return }
-        selectedIndex = 0
+        // Native behavior: the first Cmd+Tab press focuses the previous app
+        // (#2), not the current one (#1). With Shift held, focus the last app.
+        if backward {
+            selectedIndex = apps.count - 1
+        } else {
+            selectedIndex = apps.count > 1 ? 1 : 0
+        }
         let panel = ensurePanel()
-        switcherView.setApps(apps, selection: 0)
+        switcherView.setApps(apps, selection: selectedIndex)
         panel.setContentSize(switcherView.contentSize(forAppCount: apps.count))
         positionPanel(panel)
         panel.orderFrontRegardless()

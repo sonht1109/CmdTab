@@ -260,7 +260,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let code = Int(event.getIntegerValueField(.keyboardEventKeycode))
 
             if cmd && code == keyTab && !overlayVisible {
-                presentOverlay()
+                presentOverlay(backward: flags.contains(.maskShift))
                 return nil
             }
 
@@ -288,11 +288,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Overlay
 
-    private func presentOverlay() {
-        DebugLog.log("presentOverlay")
+    private func presentOverlay(backward: Bool = false) {
+        DebugLog.log("presentOverlay backward=\(backward)")
         overlayVisible = true
         startMouseMonitor()
-        switcher.present()
+        switcher.present(backward: backward)
     }
 
     private func dismissOverlay(switching: Bool) {

@@ -2,7 +2,7 @@ import AppKit
 
 final class SwitcherView: NSView {
 
-    static let itemSize = NSSize(width: 58, height: 72)
+    static let itemSize = NSSize(width: 78, height: 96)
     static let itemSpacing: CGFloat = 6
     static let padding: CGFloat = 14
 

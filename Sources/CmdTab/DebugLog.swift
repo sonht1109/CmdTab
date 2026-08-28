@@ -8,7 +8,7 @@ import Foundation
 ///
 ///     defaults write com.local.CmdTab CmdTabDebugLog -bool YES
 ///
-/// When enabled, log lines are appended to `~/tmp/cmd-tab`
+/// When enabled, log lines are appended to `~/tmp/cmd-tab/log`
 /// (menu bar icon → **Open Log…** reveals the file in Finder).
 enum DebugLog {
 
@@ -58,7 +58,7 @@ enum DebugLog {
     private static let queue = DispatchQueue(label: "CmdTab.debuglog")
     private static let logURL = FileManager.default
         .homeDirectoryForCurrentUser
-        .appendingPathComponent("tmp/cmd-tab")
+        .appendingPathComponent("tmp/cmd-tab/log")
 
     private static let formatter: DateFormatter = {
         let f = DateFormatter()
