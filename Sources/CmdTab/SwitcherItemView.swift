@@ -4,8 +4,7 @@ final class SwitcherItemView: NSView {
 
     private let iconView = NSImageView()
     private let badgeView = NSTextField(labelWithString: "")
-    private let ringLayer = CALayer()
-
+    private let shadowLayer = CALayer()
     init(app: NSRunningApplication, number: Int, selected: Bool) {
         super.init(frame: .zero)
         wantsLayer = true
@@ -15,23 +14,21 @@ final class SwitcherItemView: NSView {
         addSubview(iconView)
 
         badgeView.stringValue = "\(number)"
-        badgeView.font = .systemFont(ofSize: 10, weight: .bold)
+        badgeView.font = .systemFont(ofSize: 11, weight: .bold)
         badgeView.textColor = .white
         badgeView.alignment = .center
         badgeView.drawsBackground = true
         badgeView.backgroundColor = .black
         badgeView.wantsLayer = true
-        badgeView.layer?.cornerRadius = 8
         badgeView.layer?.masksToBounds = true
         badgeView.isEditable = false
         badgeView.isSelectable = false
         addSubview(badgeView)
 
-        ringLayer.borderWidth = 2
-        ringLayer.borderColor = NSColor.controlAccentColor.cgColor
-        ringLayer.cornerRadius = 10
-        ringLayer.isHidden = !selected
-        layer?.addSublayer(ringLayer)
+        // Solid rounded plate behind the icon — reads as a shadow, no blur.
+        shadowLayer.backgroundColor = NSColor.black.withAlphaComponent(0.6).cgColor
+        shadowLayer.opacity = selected ? 1 : 0
+        layer?.addSublayer(shadowLayer)
     }
 
     required init?(coder: NSCoder) {
@@ -39,26 +36,34 @@ final class SwitcherItemView: NSView {
     }
 
     func setSelected(_ selected: Bool) {
-        ringLayer.isHidden = !selected
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(0.15)
+        shadowLayer.opacity = selected ? 0.7 : 0
+        CATransaction.commit()
     }
 
     override func layout() {
         super.layout()
         let width = bounds.width
-        let iconSize: CGFloat = 60
+        let iconSize: CGFloat = 80
         iconView.frame = NSRect(
             x: (width - iconSize) / 2,
             y: (bounds.height - iconSize) / 2,
             width: iconSize,
             height: iconSize
         )
-        let badgeSize = NSSize(width: 22, height: 16)
+        let badgeSize: CGFloat = 18
         badgeView.frame = NSRect(
-            x: iconView.frame.maxX - badgeSize.width + 3,
+            x: iconView.frame.maxX - badgeSize + 3,
             y: iconView.frame.minY - 3,
-            width: badgeSize.width,
-            height: badgeSize.height
+            width: badgeSize,
+            height: badgeSize
         )
-        ringLayer.frame = iconView.frame.insetBy(dx: -5, dy: -5)
+        badgeView.layer?.cornerRadius = badgeSize / 2
+
+        // Solid plate extends 8pt beyond the icon on every side, same rounded shape.
+        let inset: CGFloat = -8
+        shadowLayer.frame = iconView.frame.insetBy(dx: inset, dy: inset)
+        shadowLayer.cornerRadius = 18 - inset
     }
 }
