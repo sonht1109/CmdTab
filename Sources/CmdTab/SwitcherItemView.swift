@@ -43,10 +43,10 @@ final class SwitcherItemView: NSView {
             width: iconSize,
             height: iconSize
         )
-        let badgeSize: CGFloat = 22
+        let badgeSize: CGFloat = 18
         badgeView.frame = NSRect(
-            x: iconView.frame.maxX - badgeSize + 3,
-            y: iconView.frame.minY - 3,
+            x: iconView.frame.maxX - badgeSize,
+            y: iconView.frame.minY,
             width: badgeSize,
             height: badgeSize
         )
