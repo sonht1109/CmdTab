@@ -18,7 +18,7 @@ final class SwitcherItemView: NSView {
 
         // Solid rounded plate behind the icon — reads as a shadow, no blur.
         shadowLayer.backgroundColor = NSColor.black.withAlphaComponent(0.6).cgColor
-        shadowLayer.opacity = selected ? 1 : 0
+        shadowLayer.opacity = selected ? 0.6 : 0
         layer?.addSublayer(shadowLayer)
     }
 
@@ -29,7 +29,7 @@ final class SwitcherItemView: NSView {
     func setSelected(_ selected: Bool) {
         CATransaction.begin()
         CATransaction.setAnimationDuration(0.15)
-        shadowLayer.opacity = selected ? 0.7 : 0
+        shadowLayer.opacity = selected ? 0.6 : 0
         CATransaction.commit()
     }
 
@@ -43,7 +43,7 @@ final class SwitcherItemView: NSView {
             width: iconSize,
             height: iconSize
         )
-        let badgeSize: CGFloat = 18
+        let badgeSize: CGFloat = 22
         badgeView.frame = NSRect(
             x: iconView.frame.maxX - badgeSize + 3,
             y: iconView.frame.minY - 3,
