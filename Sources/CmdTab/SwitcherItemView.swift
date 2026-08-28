@@ -3,9 +3,10 @@ import AppKit
 final class SwitcherItemView: NSView {
 
     private let iconView = NSImageView()
-    private let badgeView = NSTextField(labelWithString: "")
+    private let badgeView: NumberBadgeView
     private let shadowLayer = CALayer()
     init(app: NSRunningApplication, number: Int, selected: Bool) {
+        badgeView = NumberBadgeView(number: number)
         super.init(frame: .zero)
         wantsLayer = true
 
@@ -13,16 +14,6 @@ final class SwitcherItemView: NSView {
         iconView.imageScaling = .scaleProportionallyUpOrDown
         addSubview(iconView)
 
-        badgeView.stringValue = "\(number)"
-        badgeView.font = .systemFont(ofSize: 11, weight: .bold)
-        badgeView.textColor = .white
-        badgeView.alignment = .center
-        badgeView.drawsBackground = true
-        badgeView.backgroundColor = .black
-        badgeView.wantsLayer = true
-        badgeView.layer?.masksToBounds = true
-        badgeView.isEditable = false
-        badgeView.isSelectable = false
         addSubview(badgeView)
 
         // Solid rounded plate behind the icon — reads as a shadow, no blur.
@@ -45,7 +36,7 @@ final class SwitcherItemView: NSView {
     override func layout() {
         super.layout()
         let width = bounds.width
-        let iconSize: CGFloat = 80
+        let iconSize: CGFloat = 74
         iconView.frame = NSRect(
             x: (width - iconSize) / 2,
             y: (bounds.height - iconSize) / 2,
@@ -59,7 +50,6 @@ final class SwitcherItemView: NSView {
             width: badgeSize,
             height: badgeSize
         )
-        badgeView.layer?.cornerRadius = badgeSize / 2
 
         // Solid plate extends 8pt beyond the icon on every side, same rounded shape.
         let inset: CGFloat = -8

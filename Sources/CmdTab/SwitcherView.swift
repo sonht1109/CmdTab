@@ -4,7 +4,7 @@ final class SwitcherView: NSView {
 
     static let itemSize = NSSize(width: 96, height: 96)
     static let itemSpacing: CGFloat = 6
-    static let padding: CGFloat = 24
+    static let padding: CGFloat = 26
 
     private let effectView = NSVisualEffectView()
     private var itemViews: [SwitcherItemView] = []
