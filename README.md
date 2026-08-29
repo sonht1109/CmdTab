@@ -2,11 +2,14 @@
 
 A lightweight macOS app switcher that replaces Command+Tab.
 
+![CmdTab switcher](docs/image.png)
+
 Works exactly like the built-in switcher, but every app icon shows a number
 (1–9). Press a number while holding **Cmd** to jump straight to that app.
 
-- Multiple monitors supported: the switcher opens on the screen where your
-  mouse is.
+- Multiple monitors supported: the switcher opens on the screen of the
+  **current app** (the one you're switching away from), so it always appears
+  where you're working — falls back to the mouse screen, then the main screen.
 - Native Swift/AppKit menu-bar app, no Electron, no timers, no background
   polling. ~0 CPU when idle.
 
@@ -73,6 +76,15 @@ defaults write com.local.CmdTab CmdTabDebugLog -bool NO
   new grants while running, so it picks them up without a restart.
 
 ## What changed
+
+- The switcher opens on the screen of the **current app** (#1), not the
+  mouse — with mouse/main-screen fallbacks when the app has no visible
+  window. The panel stays on that screen for the whole gesture.
+- Fixed multi-monitor placement with displays stacked above the primary
+  (e.g. an external monitor above the MacBook screen): the switcher used to
+  appear on the *adjacent* screen. Window coordinates from the system are
+  anchored at the primary display's top-left, and the conversion now uses
+  the right anchor.
 
 - After switching apps, the order updates so the app you switched to is #1 and
   the app you left is #2 — Cmd+Tab toggles back and forth like the native
