@@ -99,15 +99,76 @@ final class SwitcherController {
     }
 
     private func positionPanel(_ panel: NSPanel) {
-        let mouse = NSEvent.mouseLocation
-        let screen = NSScreen.screens.first { $0.frame.contains(mouse) } ?? NSScreen.main
-        guard let screen else { return }
+        let screen = panelScreen()
         let size = panel.frame.size
         let origin = NSPoint(
             x: screen.visibleFrame.midX - size.width / 2,
             y: screen.visibleFrame.midY - size.height / 2
         )
         panel.setFrameOrigin(origin)
+    }
+
+    /// Screen for the panel: the current app's screen (#1 in the list) first,
+    /// then the mouse screen, then the main screen. The panel opens on that
+    /// screen and stays there for the whole gesture — it does not follow the
+    /// selection while cycling.
+    private func panelScreen() -> NSScreen {
+        if let current = apps.first,
+           let screen = screen(for: current) {
+            DebugLog.log("panel screen: \(screen.localizedName) (current app)")
+            return screen
+        }
+        let mouse = NSEvent.mouseLocation
+        if let screen = NSScreen.screens.first(where: { $0.frame.contains(mouse) }) {
+            DebugLog.log("panel screen: \(screen.localizedName) (mouse)")
+            return screen
+        }
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        DebugLog.log("panel screen: \(screen.localizedName) (main)")
+        return screen
+    }
+
+    /// On-screen window frames (in CG display coordinates) owned by `pid`.
+    private func onScreenWindowFrames(for pid: pid_t) -> [CGRect] {
+        guard let info = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else {
+            return []
+        }
+        var frames: [CGRect] = []
+        for window in info {
+            guard let owner = window[kCGWindowOwnerPID as String] as? pid_t, owner == pid else { continue }
+            guard let layer = window[kCGWindowLayer as String] as? Int, layer == 0 else { continue }
+            guard let boundsDict = window[kCGWindowBounds as String] as? [String: CGFloat],
+                  let frame = CGRect(dictionaryRepresentation: boundsDict as CFDictionary) else { continue }
+            frames.append(frame)
+        }
+        return frames
+    }
+
+    /// The screen containing the app's largest on-screen window.
+    private func screen(for app: NSRunningApplication) -> NSScreen? {
+        let frames = onScreenWindowFrames(for: app.processIdentifier)
+        guard let largest = frames.max(by: { ($0.width * $0.height) < ($1.width * $1.height) }) else {
+            return nil
+        }
+        let center = CGPoint(x: largest.midX, y: largest.midY)
+        // CGWindow bounds live in "global display space": origin at the top-left
+        // of the primary display, y growing downward. NSScreen frames use AppKit
+        // coordinates (origin bottom-left of primary, y growing upward). Rather
+        // than flipping the window point by hand (which breaks when a display is
+        // stacked above the primary — the anchor is the PRIMARY's height, not the
+        // tallest frame), convert each screen's frame into CG display space and
+        // test the window center there directly.
+        let primaryHeight = NSScreen.screens.first { $0.frame.origin == .zero }?.frame.height
+            ?? (NSScreen.screens.map { $0.frame.maxY }.max() ?? 0)
+        return NSScreen.screens.first { screen in
+            let cgFrame = CGRect(
+                x: screen.frame.origin.x,
+                y: primaryHeight - screen.frame.maxY,
+                width: screen.frame.width,
+                height: screen.frame.height
+            )
+            return cgFrame.insetBy(dx: -2, dy: -2).contains(center)
+        }
     }
 
     private func buildAppList() {

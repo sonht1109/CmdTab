@@ -3,8 +3,8 @@ import AppKit
 final class SwitcherView: NSView {
 
     static let itemSize = NSSize(width: 96, height: 96)
-    static let itemSpacing: CGFloat = 2
-    static let padding: CGFloat = 20
+    static let itemSpacing: CGFloat = 0.5
+    static let padding: CGFloat = 16
 
     private let effectView = NSVisualEffectView()
     private var itemViews: [SwitcherItemView] = []
@@ -12,7 +12,7 @@ final class SwitcherView: NSView {
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        layer?.cornerRadius = 14
+        layer?.cornerRadius = 14 + Self.padding
         layer?.masksToBounds = true
         layer?.borderWidth = 1
         layer?.borderColor = NSColor.white.withAlphaComponent(0.15).cgColor
@@ -21,7 +21,7 @@ final class SwitcherView: NSView {
         effectView.blendingMode = .behindWindow
         effectView.state = .active
         effectView.wantsLayer = true
-        effectView.layer?.cornerRadius = 14
+        effectView.layer?.cornerRadius = 26
         addSubview(effectView)
     }
 
