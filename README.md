@@ -2,6 +2,10 @@
 
 A macOS app switcher that replaces Cmd+Tab — same behavior, plus numbers.
 
+<p align="center">
+  <img src="docs/logo.png" alt="CmdTab logo" width="256">
+</p>
+
 ![CmdTab switcher](docs/image.png)
 
 ## What's different from the native switcher
@@ -11,9 +15,15 @@ A macOS app switcher that replaces Cmd+Tab — same behavior, plus numbers.
 
 Everything else is the native switcher: most-recently-used order, #2 pre-focused, **Tab** / **Shift+Tab** to cycle, release **Cmd** to switch, **Esc** or click outside to cancel.
 
-## Setup
+## Install
 
-Requires **Input Monitoring** and **Accessibility** permissions — macOS prompts on first launch (missed them? menu bar icon → **Open Permissions…**).
+### Download (easiest)
+
+Grab the latest `CmdTab.dmg` from [Releases](https://github.com/sonht1109/CmdTab/releases), drag **CmdTab** into Applications, and launch it.
+
+> First launch: right-click → **Open** → **Open** (releases aren't Apple-notarized yet). Then grant **Input Monitoring** and **Accessibility** — macOS prompts on first launch (missed them? menu bar icon → **Open Permissions…**).
+
+### Build from source
 
 ```sh
 ./build.sh   # builds dist/CmdTab.app

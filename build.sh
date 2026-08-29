@@ -2,16 +2,11 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-swift build -c release
-BIN_DIR="$(swift build -c release --show-bin-path)"
-BIN="$BIN_DIR/CmdTab"
+./scripts/package-app.sh
 
 APP="dist/CmdTab.app"
-rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
-cp "$BIN" "$APP/Contents/MacOS/CmdTab"
-cp Info.plist "$APP/Contents/Info.plist"
+# Local ad-hoc signature (self-signed cert in the local keychain). Not for
+# distribution — CI handles Developer ID signing/notarization for releases.
 codesign --force --sign "CmdTab Codesign" --keychain "$HOME/Library/Keychains/cmdtab-signing.keychain-db" "$APP" >/dev/null 2>&1 || true
 
-echo "Done. App at: $APP"
 echo "Run with: open $APP"

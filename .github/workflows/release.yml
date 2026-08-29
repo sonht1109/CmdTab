@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    env:
+      # Signing + notarization turn on automatically once these secrets exist
+      # in the repo settings (see README "Releasing"). Until then releases are
+      # ad-hoc signed, which works but shows a Gatekeeper warning.
+      HAS_SIGNING: ${{ secrets.APPLE_CERT_BASE64 != '' }}
+      CERT_BASE64: ${{ secrets.APPLE_CERT_BASE64 }}
+      CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build & package .app
+        run: ./scripts/package-app.sh
+
+      - name: Import Developer ID certificate
+        if: env.HAS_SIGNING == 'true'
+        run: |
+          echo "$CERT_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          KEYCHAIN="$RUNNER_TEMP/build.keychain"
+          security create-keychain -p runner "$KEYCHAIN"
+          security default-keychain -s "$KEYCHAIN"
+          security unlock-keychain -p runner "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" \
+            -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/notarytool
+          security set-key-partition-list -S apple-tool:,apple: -s -k runner "$KEYCHAIN"
+          CERT_ID="$(security find-identity -v -p codesigning "$KEYCHAIN" \
+            | awk '/Developer ID Application/ {print $2; exit}')"
+          echo "CERT_ID=$CERT_ID" >> "$GITHUB_ENV"
+
+      - name: Sign (Developer ID)
+        if: env.HAS_SIGNING == 'true'
+        run: |
+          codesign --force --options runtime --timestamp \
+            --sign "$CERT_ID" --keychain "$RUNNER_TEMP/build.keychain" \
+            dist/CmdTab.app
+
+      - name: Notarize & staple
+        if: env.HAS_SIGNING == 'true'
+        run: |
+          xcrun notarytool submit dist/CmdTab.app \
+            --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" \
+            --password "$APPLE_APP_PASSWORD" --wait
+          xcrun stapler staple dist/CmdTab.app
+
+      - name: Sign (ad-hoc, unsigned fallback)
+        if: env.HAS_SIGNING != 'true'
+        run: codesign --force --deep -s - dist/CmdTab.app
+
+      - name: Create DMG
+        run: hdiutil create -volname CmdTab -srcfolder dist/CmdTab.app -ov -format UDZO CmdTab.dmg
+
+      - name: Create ZIP
+        run: ditto -c -k --keepParent dist/CmdTab.app CmdTab.zip
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CmdTab
+          path: CmdTab.dmg
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" CmdTab.dmg CmdTab.zip --generate-notes
