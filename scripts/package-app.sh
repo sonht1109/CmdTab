@@ -17,7 +17,8 @@ fi
 
 APP="dist/CmdTab.app"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/CmdTab"
 cp Info.plist "$APP/Contents/Info.plist"
+cp Resources/CmdTab.icns "$APP/Contents/Resources/CmdTab.icns"
 echo "App at: $APP"
