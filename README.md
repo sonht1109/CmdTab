@@ -2,6 +2,10 @@
 
 A macOS app switcher that replaces Cmd+Tab — same behavior, plus numbers.
 
+<p align="center">
+  <img src="docs/logo.png" alt="CmdTab logo" width="256">
+</p>
+
 ![CmdTab switcher](docs/image.png)
 
 ## What's different from the native switcher
@@ -25,20 +29,6 @@ Grab the latest `CmdTab.dmg` from [Releases](https://github.com/sonht1109/CmdTab
 ./build.sh   # builds dist/CmdTab.app
 ./run.sh     # launches it
 ```
-
-## Releasing
-
-Push a version tag and CI does the rest — builds a universal (Intel + Apple Silicon) app, signs it, and attaches `CmdTab.dmg` + `CmdTab.zip` to a GitHub Release:
-
-```sh
-git tag v1.0.0 && git push origin v1.0.0
-```
-
-Until Apple Developer ID secrets are added, releases are **ad-hoc signed and not notarized**, so users see a Gatekeeper warning on first launch. To get a clean install, add these repo secrets (requires an Apple Developer account) — the workflow enables signing/notarization automatically once they exist:
-
-- `APPLE_CERT_BASE64` — Developer ID Application certificate + private key, exported as `.p12` and base64-encoded
-- `APPLE_CERT_PASSWORD` — the `.p12` password
-- `APPLE_ID` / `APPLE_TEAM_ID` / `APPLE_APP_PASSWORD` — App Store Connect credentials for `notarytool`
 
 ## Debugging
 
