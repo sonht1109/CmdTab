@@ -79,4 +79,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" CmdTab.dmg CmdTab.zip --generate-notes
+          PRERELEASE_FLAG=""
+          if [[ "$GITHUB_REF_NAME" == *-dev ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          gh release create "$GITHUB_REF_NAME" CmdTab.dmg CmdTab.zip --generate-notes $PRERELEASE_FLAG

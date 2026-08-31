@@ -3,7 +3,7 @@
 A macOS app switcher that replaces Cmd+Tab — same behavior, plus numbers.
 
 <p align="center">
-  <img src="docs/logo.png" alt="CmdTab logo" width="256">
+  <img src="docs/logo-v2.png" alt="CmdTab logo" width="256">
 </p>
 
 ![CmdTab switcher](docs/image.png)
