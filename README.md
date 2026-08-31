@@ -30,6 +30,19 @@ Grab the latest `CmdTab.dmg` from [Releases](https://github.com/sonht1109/CmdTab
 ./run.sh     # launches it
 ```
 
+## Releasing
+
+Pushing a `v*` tag triggers [GitHub Actions](.github/workflows/release.yml), which builds
+`CmdTab.dmg`/`CmdTab.zip` and creates a GitHub release (`-dev` suffix → pre-release).
+
+```sh
+./release.sh dev      # next vX.Y.Z-dev pre-release from develop
+./release.sh stable   # next vX.Y.Z release (merges develop → master)
+./release.sh dev --dry-run   # preview the tag without pushing
+```
+
+Tagging manually works too: `git tag v0.0.5-dev && git push origin v0.0.5-dev`.
+
 ## Debugging
 
 Menu bar icon → **Debug Logging** (default off) writes to `~/tmp/cmd-tab/log`.
