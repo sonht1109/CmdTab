@@ -36,12 +36,15 @@ Pushing a `v*` tag triggers [GitHub Actions](.github/workflows/release.yml), whi
 `CmdTab.dmg`/`CmdTab.zip` and creates a GitHub release (`-dev` suffix → pre-release).
 
 ```sh
-./release.sh dev      # next vX.Y.Z-dev pre-release from develop
-./release.sh stable   # next vX.Y.Z release (merges develop → master)
-./release.sh dev --dry-run   # preview the tag without pushing
+./release.sh dev [--tag v0.1.0-dev.2]   # dev pre-release from develop
+./release.sh stable [--tag v0.1.0]      # stable release (merges develop → master)
+./release.sh dev --dry-run              # preview the tag without pushing
 ```
 
-Tagging manually works too: `git tag v0.0.5-dev && git push origin v0.0.5-dev`.
+Without `--tag` the last matching tag is bumped (`v0.1.0-dev.2` → `v0.1.0-dev.3`,
+`v0.1.0` → `v0.1.1`). Pass `--tag` to pin the version — handy for keeping dev and
+stable in sync (ship `v0.1.0-dev.2`, then `v0.1.0`). Tagging manually works too:
+`git tag v0.1.0-dev.2 && git push origin v0.1.0-dev.2`.
 
 ## Debugging
 
