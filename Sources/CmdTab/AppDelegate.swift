@@ -13,6 +13,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private var statusItem: NSStatusItem?
+    private var appearanceObserver: NSKeyValueObservation?
     private var debugLogMenuItem: NSMenuItem?
     private var tap: CFMachPort?
     private var tapSource: CFRunLoopSource?
@@ -53,10 +54,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Menu bar
 
     private func setupStatusItem() {
-        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = item.button {
-            button.image = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: "CmdTab")
-            button.image?.isTemplate = true
+            // The menu bar inverts per appearance: dark-gray icon on the light
+            // bar, white icon on the dark bar. Swap automatically when the
+            // appearance changes (effectiveAppearance is KVO-observable).
+            appearanceObserver = button.observe(\.effectiveAppearance, options: [.initial, .new]) { [weak self] button, _ in
+                self?.updateMenuBarIcon(for: button)
+            }
         }
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "Open Permissions…", action: #selector(openPermissions), keyEquivalent: ""))
@@ -70,6 +75,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem(title: "Quit CmdTab", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         item.menu = menu
         statusItem = item
+    }
+
+    /// Picks the menu bar icon matching the current appearance: the dark-gray
+    /// icon for the light menu bar, the white icon for the dark one.
+    private func updateMenuBarIcon(for button: NSStatusBarButton) {
+        let isDark = button.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        let name = isDark ? "MenuBarIcon-White" : "MenuBarIcon-Dark"
+        guard let url = Bundle.main.url(forResource: name, withExtension: "png"),
+              let image = NSImage(contentsOf: url) else {
+            DebugLog.log("menu bar icon \(name) not found in bundle")
+            return
+        }
+        let height: CGFloat = 18
+        image.size = NSSize(width: height * image.size.width / image.size.height, height: height)
+        button.image = image
     }
 
     @objc private func toggleDebugLogging() {
