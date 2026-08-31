@@ -1,25 +1,53 @@
 #!/bin/bash
-# Regenerate Resources/CmdTab.icns from docs/logo.png and the menu bar icons
+# Regenerate Resources/CmdTab.icns from docs/logo-v2.png and the menu bar icons
 # from docs/menu-bar-icon-*.png. Run whenever any logo changes, then commit.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # --- App icon (.icns) ---
-SRC="docs/logo.png"
+SRC="docs/logo-v2.png"
 ICONSET="$(mktemp -d)/CmdTab.iconset"
 mkdir -p "$ICONSET"
+SQUARE="$(mktemp -d)/logo-square.png"
 OUT="Resources/CmdTab.icns"
 
-sips -z 16 16   "$SRC" --out "$ICONSET/icon_16x16.png"        >/dev/null
-sips -z 32 32   "$SRC" --out "$ICONSET/icon_16x16@2x.png"     >/dev/null
-sips -z 32 32   "$SRC" --out "$ICONSET/icon_32x32.png"        >/dev/null
-sips -z 64 64   "$SRC" --out "$ICONSET/icon_32x32@2x.png"     >/dev/null
-sips -z 128 128 "$SRC" --out "$ICONSET/icon_128x128.png"      >/dev/null
-sips -z 256 256 "$SRC" --out "$ICONSET/icon_128x128@2x.png"   >/dev/null
-sips -z 256 256 "$SRC" --out "$ICONSET/icon_256x256.png"      >/dev/null
-sips -z 512 512 "$SRC" --out "$ICONSET/icon_256x256@2x.png"   >/dev/null
-sips -z 512 512 "$SRC" --out "$ICONSET/icon_512x512.png"      >/dev/null
-sips -z 1024 1024 "$SRC" --out "$ICONSET/icon_512x512@2x.png" >/dev/null
+# The logo art sits on a transparent 3:2 canvas with empty margins — crop to
+# the visible content (plus a small breathing margin) and pad to a square
+# canvas, since .icns slots are square.
+python3 - "$SRC" "$SQUARE" <<'PY'
+import sys
+from PIL import Image
+
+src, out = sys.argv[1], sys.argv[2]
+im = Image.open(src).convert('RGBA')
+px = im.load()
+w, h = im.size
+minx, miny, maxx, maxy = w, h, 0, 0
+for y in range(h):
+    for x in range(w):
+        if px[x, y][3] > 8:
+            minx, miny = min(minx, x), min(miny, y)
+            maxx, maxy = max(maxx, x), max(maxy, y)
+m = round((maxx - minx + 1) * 0.02)  # small margin so edges don't clip
+box = (max(0, minx - m), max(0, miny - m), min(w, maxx + m), min(h, maxy + m))
+im = im.crop(box)
+size = max(im.size)
+canvas = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+canvas.paste(im, ((size - im.size[0]) // 2, (size - im.size[1]) // 2))
+canvas.save(out)
+print(f"Wrote {out} ({size}x{size})")
+PY
+
+sips -z 16 16   "$SQUARE" --out "$ICONSET/icon_16x16.png"        >/dev/null
+sips -z 32 32   "$SQUARE" --out "$ICONSET/icon_16x16@2x.png"     >/dev/null
+sips -z 32 32   "$SQUARE" --out "$ICONSET/icon_32x32.png"        >/dev/null
+sips -z 64 64   "$SQUARE" --out "$ICONSET/icon_32x32@2x.png"     >/dev/null
+sips -z 128 128 "$SQUARE" --out "$ICONSET/icon_128x128.png"      >/dev/null
+sips -z 256 256 "$SQUARE" --out "$ICONSET/icon_128x128@2x.png"   >/dev/null
+sips -z 256 256 "$SQUARE" --out "$ICONSET/icon_256x256.png"      >/dev/null
+sips -z 512 512 "$SQUARE" --out "$ICONSET/icon_256x256@2x.png"   >/dev/null
+sips -z 512 512 "$SQUARE" --out "$ICONSET/icon_512x512.png"      >/dev/null
+sips -z 1024 1024 "$SQUARE" --out "$ICONSET/icon_512x512@2x.png" >/dev/null
 
 iconutil -c icns "$ICONSET" -o "$OUT"
 echo "Wrote $OUT"
