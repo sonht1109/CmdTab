@@ -1,4 +1,3 @@
 .build
 dist
-# author-only local release helper
 release.sh
