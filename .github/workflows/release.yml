@@ -13,8 +13,8 @@ jobs:
     runs-on: macos-15
     env:
       # Signing + notarization turn on automatically once these secrets exist
-      # in the repo settings (see README "Releasing"). Until then releases are
-      # ad-hoc signed, which works but shows a Gatekeeper warning.
+      # in the repo settings. Until then releases are ad-hoc signed, which
+      # works but shows a Gatekeeper warning.
       HAS_SIGNING: ${{ secrets.APPLE_CERT_BASE64 != '' }}
       CERT_BASE64: ${{ secrets.APPLE_CERT_BASE64 }}
       CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
